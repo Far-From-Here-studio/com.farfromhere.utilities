@@ -40,7 +40,61 @@ namespace FFH.Utilities.SceneManagement
                 Debug.LogWarning("Scene " + sceneName + " is already loaded.");
             }
         }
+        public void UnloadScene(string sceneName)
+        {
+            SceneManager.UnloadSceneAsync(sceneName);
+        }
 
+
+        public void LoadAllScenesInList(string listName)
+        {
+            SceneList sceneList = sceneLists.Find(list => list.listName == listName);
+            if (sceneList != null)
+            {
+#if UNITY_EDITOR
+                foreach (UnityEngine.Object scene in sceneList.scenes)
+                {
+
+                    if (!EditorApplication.isPlaying)
+                    {
+                        LoadSceneEditor(scene);
+                    }
+                    else
+                    {
+                        LoadScene(scene.name);
+                    }
+                }
+#else
+            foreach (string sceneName in sceneList.scenesName)
+            {
+                LoadScene(sceneName);
+            }
+#endif
+            }
+        }
+
+        public void UnloadAllScenesInList(string listName)
+        {
+            SceneList sceneList = sceneLists.Find(list => list.listName == listName);
+            if (sceneList != null)
+            {
+#if UNITY_EDITOR
+                foreach (UnityEngine.Object scene in sceneList.scenes)
+                {
+
+                    if (!EditorApplication.isPlaying)
+                    { UnloadSceneEditor(scene); }
+                    else { UnloadScene(scene.name); }
+                }
+#else
+            foreach (string sceneName in sceneList.scenesName)
+            {
+                UnloadScene(sceneName);
+            }
+#endif
+
+            }
+        }
         private bool IsSceneLoaded(string sceneName)
         {
             for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -150,61 +204,7 @@ namespace FFH.Utilities.SceneManagement
             if (LoadAtStart) LoadScene(sceneLists[ListIndexToLoadAtStart].scenesName[ListIndexToLoadAtStart]);
         }
 
-        public void UnloadScene(string sceneName)
-        {
-            SceneManager.UnloadSceneAsync(sceneName);
-        }
 
-        public void LoadAllScenesInList(string listName)
-        {
-            SceneList sceneList = sceneLists.Find(list => list.listName == listName);
-            if (sceneList != null)
-            {
-#if UNITY_EDITOR
-                foreach (UnityEngine.Object scene in sceneList.scenes)
-                {
-
-                    if (!EditorApplication.isPlaying)
-                    {
-                        LoadSceneEditor(scene);
-                    }
-                    else
-                    {
-                        LoadScene(scene.name);
-                    }
-                }
-#else
-            foreach (string sceneName in sceneList.scenesName)
-            {
-                LoadScene(sceneName);
-            }
-#endif
-            }
-        }
-
-        public void UnloadAllScenesInList(string listName)
-        {
-            SceneList sceneList = sceneLists.Find(list => list.listName == listName);
-            if (sceneList != null)
-            {
-#if UNITY_EDITOR
-                foreach (UnityEngine.Object scene in sceneList.scenes)
-                {
-
-                    if (!EditorApplication.isPlaying)
-                    { UnloadSceneEditor(scene); }
-                    else { UnloadScene(scene.name); }
-                }
-#else
-            foreach (string sceneName in sceneList.scenesName)
-            {
-                UnloadScene(sceneName);
-            }
-#endif
-
-
-            }
-        }
 
 #if UNITY_EDITOR
         public void UnloadSceneEditor(UnityEngine.Object sceneAsset)
