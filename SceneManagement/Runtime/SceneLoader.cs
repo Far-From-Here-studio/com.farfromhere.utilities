@@ -467,14 +467,14 @@ namespace FFH.Utilities.SceneManagement
                 return;
             }
 
-            if (loadedScene.handle == gameObject.scene.handle)
+            if (IsSameSceneHandle(loadedScene.handle, gameObject.scene.handle))
             {
                 Log($"Skip unloading owner scene: {loadedScene.path}");
                 return;
             }
 
             Scene activeScene = SceneManager.GetActiveScene();
-            if (activeScene.IsValid() && activeScene.handle == loadedScene.handle)
+            if (activeScene.IsValid() && IsSameSceneHandle(activeScene.handle, loadedScene.handle))
             {
                 Scene fallbackScene = FindFirstLoadedSceneExcept(loadedScene.handle);
                 if (fallbackScene.IsValid() && fallbackScene.isLoaded)
@@ -534,7 +534,21 @@ namespace FFH.Utilities.SceneManagement
             return default;
         }
 
+#if UNITY_6000_5_OR_NEWER
+        private static bool IsSameSceneHandle(SceneHandle a, SceneHandle b)
+        {
+            return a.GetRawData() == b.GetRawData();
+        }
+
+        private static Scene FindFirstLoadedSceneExcept(SceneHandle excludedHandle)
+#else
+        private static bool IsSameSceneHandle(int a, int b)
+        {
+            return a == b;
+        }
+
         private static Scene FindFirstLoadedSceneExcept(int excludedHandle)
+#endif
         {
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
@@ -544,7 +558,7 @@ namespace FFH.Utilities.SceneManagement
                     continue;
                 }
 
-                if (scene.handle != excludedHandle)
+                if (!IsSameSceneHandle(scene.handle, excludedHandle))
                 {
                     return scene;
                 }
@@ -678,7 +692,7 @@ namespace FFH.Utilities.SceneManagement
                 return;
             }
 
-            if (scene.handle == gameObject.scene.handle)
+            if (IsSameSceneHandle(scene.handle, gameObject.scene.handle))
             {
                 Log($"Skip closing owner scene in editor: {scene.path}");
                 return;
